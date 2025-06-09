@@ -1,0 +1,147 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "1. Flush",
+      "type": "shell",
+      "command": "python manage.py safe && sleep 3",
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "✘.*",
+          "message": 1
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "showReuseMessage": false,
+        "close": false,
+        "focus": true
+      }
+    },
+    {
+      "label": "2. Django",
+      "type": "shell",
+      "command": "python manage.py runserver localhost:8000",
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "Error:.*",
+          "message": 1
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "close": true,
+        "focus": true
+      }
+    },
+    {
+      "label": "3. Docker Compose Up",
+      "type": "shell",
+      "command": "docker-compose up -d && sleep 3",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "close": true,
+        "focus": true
+      }
+    },
+    {
+      "label": "4. Docker Compose Down",
+      "type": "shell",
+      "command": "docker compose down -v && sleep 3",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "close": true,
+        "focus": true
+      }
+    },
+    {
+      "label": "5. Celery",
+      "type": "shell",
+      "command": "celery -A config worker --loglevel=info",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "close": true,
+        "focus": false
+      }
+    },
+    {
+      "label": "6. Celery Flower",
+      "type": "shell",
+      "command": "celery -A config flower --port=5555",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "close": true,
+        "focus": false
+      }
+    },
+    {
+      "label": "7. Open Celery Flower on Web",
+      "type": "shell",
+      "command": "open http://0.0.0.0:5555",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "close": true,
+        "focus": false
+      }
+    },
+    {
+      "label": "8. Run Client",
+      "type": "shell",
+      "command": "pnpm run dev",
+      "options": {
+        "cwd": "${workspaceFolder}/client"
+      },
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "close": true,
+        "focus": false
+      }
+    }
+  ]
+}
