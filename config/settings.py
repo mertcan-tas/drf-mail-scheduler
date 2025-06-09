@@ -2,6 +2,7 @@ from pathlib import Path
 from decouple import config, Csv
 from datetime import timedelta
 from pymongo import MongoClient
+import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -19,20 +20,17 @@ INSTALLED_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
-    'storages',
     'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
-    'django_celery_results',
+    'django_rq',
     'drf_spectacular',
-    'schema_graph',
 ]
 
 PROJECT_APPS = [
     'core',
     'app',
-    'testing',
 ]
 
 INSTALLED_APPS += PROJECT_APPS + THIRD_PARTY_APPS
@@ -119,23 +117,25 @@ CHANNEL_LAYERS = {
     },
 }
 
-CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
-CELERY_BROKER_URL = f'redis://:{config('REDIS_PASSWORD')}@{config('REDIS_HOST')}/{config('REDIS_DB')}'
-CELERY_TIMEZONE = 'Europe/Istanbul'
-CELERY_RESULT_BACKEND = 'django-db'
-CELERY_ACCEPT_CONTENT = ['application/json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TASK_TRACK_STARTED = True
-CELERY_TASK_TIME_LIMIT = 30 * 60
+RQ_QUEUES = {
+    'default': {
+        'HOST': config('REDIS_HOST'),
+        'PORT': 6379,
+        'DB': config('REDIS_DB'),
+        'PASSWORD': config('REDIS_PASSWORD'),
+        'DEFAULT_TIMEOUT': 360,
+    },
+}
 
-TIME_ZONE = 'Europe/Istanbul'
-TIME_ZONE = "UTC"
+
+TIME_ZONE = "Europe/Istanbul"
 USE_I18N = True
 USE_TZ = True
 STATIC_URL = "static/"
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') 
 
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 EMAIL_BACKEND = config('EMAIL_BACKEND', default="django.core.mail.backends.smtp.EmailBackend", cast=str)
 EMAIL_HOST = config('EMAIL_HOST', default="localhost", cast=str)   
@@ -144,43 +144,6 @@ EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=False, cast=bool)
 EMAIL_USE_SSL = config('EMAIL_USE_SSL', default=False, cast=bool)        
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', default="noreply@app.com", cast=str)           
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default="", cast=str)
-
-
-MINIO_ENDPOINT = config('MINIO_ENDPOINT', default='localhost:9000', cast=str)
-MINIO_ACCESS_KEY = config('MINIO_ACCESS_KEY', default='minioadmin', cast=str)
-MINIO_SECRET_KEY = config('MINIO_SECRET_KEY', default='minioadmin', cast=str)
-MINIO_USE_HTTPS = config('MINIO_USE_HTTPS', default=False, cast=bool)
-MINIO_BUCKET_NAME = config('MINIO_BUCKET_NAME', default='files', cast=str)
-
-AWS_S3_ENDPOINT_URL = f'http://{MINIO_ENDPOINT}'
-AWS_ACCESS_KEY_ID = MINIO_ACCESS_KEY
-AWS_SECRET_ACCESS_KEY = MINIO_SECRET_KEY
-AWS_STORAGE_BUCKET_NAME = MINIO_BUCKET_NAME
-AWS_S3_USE_SSL = MINIO_USE_HTTPS
-AWS_S3_FILE_OVERWRITE = False
-AWS_QUERYSTRING_AUTH = False
-AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
-
-AWS_LOCATION = 'media'
-AWS_STATIC_LOCATION = 'static'
-
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
-STORAGES = {
-    "default": {
-        "BACKEND": DEFAULT_FILE_STORAGE,
-        "OPTIONS": {
-            "location": AWS_LOCATION,
-        },
-    },
-    "staticfiles": {
-        "BACKEND": STATICFILES_STORAGE,
-        "OPTIONS": {
-            "location": AWS_STATIC_LOCATION,
-        },
-    }
-}
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -191,10 +154,10 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'DEFAULT_FILTER_BACKENDS': [
-        'django_filters.rest_framework.DjangoFilterBackend'
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
     ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
@@ -237,7 +200,7 @@ SIMPLE_JWT = {
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'DRF Mail Scheduler',
-    'DESCRIPTION': 'DRF Mail Scheduler is a robust API service built with Django REST Framework and Celery, designed to schedule and send emails asynchronously. Ideal for applications requiring delayed or periodic email delivery such as reminders, notifications, and newsletters.',
+    'DESCRIPTION': 'DRF Mail Scheduler is a robust API service built with Django REST Framework and Django Q, designed to schedule and send emails asynchronously. Ideal for applications requiring delayed or periodic email delivery such as reminders, notifications, and newsletters.',
     'VERSION': '1.0.1',
     'SERVE_INCLUDE_SCHEMA': False,
 }

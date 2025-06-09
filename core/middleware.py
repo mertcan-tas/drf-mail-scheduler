@@ -8,14 +8,14 @@ api_logger = logging.getLogger('api_logs')
 class LoggingMiddleware(MiddlewareMixin):
     
     LOGGING_CONFIG = {
-        '/api/auth/login/': {
+        '/api/schedule-mail/': {
             'POST': {
                 'log_request': True,
                 'log_response': True,
-                'hide_request': True,
-                'hide_response': True,
-                'tag': 'auth:login',
-                'category': 'authentication'
+                'hide_request': False,
+                'hide_response': False,
+                'tag': 'schedule:mail',
+                'category': 'schedule'
             },
         }, 
     }

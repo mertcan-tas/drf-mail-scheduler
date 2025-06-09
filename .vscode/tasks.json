@@ -45,9 +45,9 @@
       }
     },
     {
-      "label": "3. Docker Compose Up",
+      "label": "3. Docker Build",
       "type": "shell",
-      "command": "docker-compose up -d && sleep 3",
+      "command": "docker-compose build && sleep 3",
       "problemMatcher": [],
       "group": {
         "kind": "build",
@@ -61,7 +61,23 @@
       }
     },
     {
-      "label": "4. Docker Compose Down",
+      "label": "4. Docker Compose Up",
+      "type": "shell",
+      "command": "docker-compose up --build -d && sleep 3",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "close": true,
+        "focus": true
+      }
+    },
+    {
+      "label": "5. Docker Compose Down",
       "type": "shell",
       "command": "docker compose down -v && sleep 3",
       "problemMatcher": [],
@@ -77,55 +93,7 @@
       }
     },
     {
-      "label": "5. Celery",
-      "type": "shell",
-      "command": "celery -A config worker --loglevel=info",
-      "problemMatcher": [],
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "presentation": {
-        "reveal": "always",
-        "panel": "new",
-        "close": true,
-        "focus": false
-      }
-    },
-    {
-      "label": "6. Celery Flower",
-      "type": "shell",
-      "command": "celery -A config flower --port=5555",
-      "problemMatcher": [],
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "presentation": {
-        "reveal": "always",
-        "panel": "new",
-        "close": true,
-        "focus": false
-      }
-    },
-    {
-      "label": "7. Open Celery Flower on Web",
-      "type": "shell",
-      "command": "open http://0.0.0.0:5555",
-      "problemMatcher": [],
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "presentation": {
-        "reveal": "always",
-        "panel": "new",
-        "close": true,
-        "focus": false
-      }
-    },
-    {
-      "label": "8. Run Client",
+      "label": "6. Run Client",
       "type": "shell",
       "command": "pnpm run dev",
       "options": {
