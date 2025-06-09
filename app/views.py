@@ -46,7 +46,7 @@ class ScheduleMailView(APIView):
             )
             
             return Response({
-                'message': 'Mail başarıyla zamanlandı',
+                'message': 'Mail was scheduled successfully',
                 'recipient_email': recipient_email,
                 'scheduled_time': scheduled_time,
                 'job_id': job.id 

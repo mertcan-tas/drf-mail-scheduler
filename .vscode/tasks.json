@@ -2,49 +2,6 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "1. Flush",
-      "type": "shell",
-      "command": "python manage.py safe && sleep 3",
-      "problemMatcher": {
-        "pattern": {
-          "regexp": "✘.*",
-          "message": 1
-        }
-      },
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "showReuseMessage": false,
-        "close": false,
-        "focus": true
-      }
-    },
-    {
-      "label": "2. Django",
-      "type": "shell",
-      "command": "python manage.py runserver localhost:8000",
-      "problemMatcher": {
-        "pattern": {
-          "regexp": "Error:.*",
-          "message": 1
-        }
-      },
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "presentation": {
-        "reveal": "always",
-        "panel": "new",
-        "close": true,
-        "focus": true
-      }
-    },
-    {
       "label": "3. Docker Build",
       "type": "shell",
       "command": "docker-compose build && sleep 3",
