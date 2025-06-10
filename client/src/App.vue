@@ -110,6 +110,19 @@
                 </v-alert>
 
                 <v-alert
+                  v-if="isPastTime"
+                  type="warning"
+                  variant="tonal"
+                  class="mb-4"
+                >
+                  <template v-slot:prepend>
+                    <v-icon>mdi-alert</v-icon>
+                  </template>
+                  <strong>Warning:</strong> The selected time is in the past.
+                  Please choose a future date and time.
+                </v-alert>
+
+                <v-alert
                   v-if="error"
                   type="error"
                   variant="tonal"
@@ -141,7 +154,7 @@
               <v-btn-primary
                 @click="submitForm"
                 :loading="loading"
-                :disabled="!valid"
+                :disabled="!valid || isPastTime"
                 class="ml-2"
               >
                 <v-icon left>mdi-send</v-icon>
@@ -151,7 +164,6 @@
           </v-card>
         </v-col>
       </v-row>
-
 
       <v-snackbar
         v-model="snackbar.show"
@@ -216,8 +228,16 @@ export default {
         (v) => !!v || "Message is required",
         (v) => (v && v.length >= 3) || "Message must be at least 3 characters",
       ],
-      dateRules: [(v) => !!v || "Date selection is required"],
-      timeRules: [(v) => !!v || "Time selection is required"],
+      dateRules: [
+        (v) => !!v || "Date selection is required",
+        (v) => this.validateFutureDate(v) || "Date must be in the future",
+      ],
+      timeRules: [
+        (v) => !!v || "Time selection is required",
+        (v) =>
+          this.validateFutureDateTime(v) ||
+          "Selected time must be in the future",
+      ],
     };
   },
 
@@ -293,6 +313,15 @@ export default {
         minute: "2-digit",
       });
     },
+
+    isPastTime() {
+      if (!this.scheduledDateTime) return false;
+
+      const selectedDateTime = new Date(this.scheduledDateTime);
+      const now = new Date();
+
+      return selectedDateTime <= now;
+    },
   },
 
   watch: {
@@ -309,15 +338,52 @@ export default {
     },
 
     convertToUTC(localDateTime, timezone) {
-      const tempDate = new Date(
-        localDateTime.toLocaleString("en-US", { timeZone: timezone })
-      );
-      const utcDate = new Date(
-        localDateTime.toLocaleString("en-US", { timeZone: "UTC" })
-      );
-      const offset = utcDate.getTime() - tempDate.getTime();
+      try {
+        const options = {
+          timeZone: timezone,
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+        };
 
-      return new Date(localDateTime.getTime() + offset);
+        const utcTime = new Date(
+          localDateTime.getTime() - localDateTime.getTimezoneOffset() * 60000
+        );
+        return utcTime;
+      } catch (error) {
+        console.error("Timezone conversion error:", error);
+        return localDateTime;
+      }
+    },
+
+    validateFutureDate(dateValue) {
+      if (!dateValue || !this.selectedDate) return true;
+
+      const today = new Date();
+      const selectedDate = new Date(this.selectedDate);
+
+      today.setHours(0, 0, 0, 0);
+      selectedDate.setHours(0, 0, 0, 0);
+
+      return selectedDate >= today;
+    },
+
+    validateFutureDateTime(timeValue) {
+      if (!timeValue || !this.selectedDate || !this.selectedTime) return true;
+
+      const dateStr =
+        typeof this.selectedDate === "string"
+          ? this.selectedDate
+          : this.selectedDate.toISOString().split("T")[0];
+
+      const selectedDateTime = new Date(`${dateStr}T${this.selectedTime}:00`);
+      const now = new Date();
+
+      return selectedDateTime > now;
     },
 
     hideSnackbar() {
@@ -327,7 +393,15 @@ export default {
     async submitForm() {
       const { valid } = await this.$refs.form.validate();
 
-      if (valid && this.scheduledDateTime) {
+      if (this.isPastTime) {
+        this.mailSchedulerStore.showSnackbar(
+          "The scheduled time must be in the future. Please select a future date and time.",
+          "error"
+        );
+        return;
+      }
+
+      if (valid && this.scheduledDateTime && !this.isPastTime) {
         try {
           await this.mailSchedulerStore.scheduleEmail({
             recipient_email: this.mailData.recipient_email,
@@ -336,22 +410,32 @@ export default {
             scheduled_time: this.scheduledDateTime,
           });
 
+          this.$refs.form.resetValidation();
+          this.mailSchedulerStore.resetForm();
           this.resetFormData();
         } catch (error) {
           console.error("Email scheduling error:", error);
+        }
+      } else {
+        if (!valid) {
+          this.mailSchedulerStore.showSnackbar(
+            "Please fill in all required fields correctly.",
+            "error"
+          );
         }
       }
     },
 
     resetForm() {
+      this.$refs.form.resetValidation();
       this.mailSchedulerStore.resetForm();
       this.resetFormData();
-      this.$refs.form.resetValidation();
+      this.mailSchedulerStore.clearMessages();
     },
 
     resetFormData() {
       this.selectedDate = null;
-      this.selectedTime = "";
+      this.selectedTime = null;
       this.selectedTimezone = "Europe/Istanbul";
     },
 

@@ -183,7 +183,7 @@ cython_debug/
 .DS_Store
 node_modules
 /dist
-
+.pnpm-store/
 # local env files
 .env.local
 .env.*.local
