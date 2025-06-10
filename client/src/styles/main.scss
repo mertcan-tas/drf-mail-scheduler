@@ -1,0 +1,30 @@
+$primary-font: "Roboto", sans-serif;
+
+html,
+body,
+div {
+  font-family: $primary-font !important;
+}
+
+.v-application {
+  font-family: $primary-font !important;
+
+  .headline,
+  .title,
+  .subtitle-1,
+  .subtitle-2,
+  .body-1,
+  .body-2,
+  .caption,
+  .overline {
+    font-family: $primary-font !important;
+  }
+}
+
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+
+
