@@ -10,6 +10,11 @@ This project is a Django REST Framework (DRF) application for scheduling and sen
 * **Request Logging**: Logs all incoming API requests to MongoDB for auditing and debugging.
 * **Email Testing**: Integrates with Mailpit for easy local email development and testing.
 
+
+## Preview
+
+![](https://raw.githubusercontent.com/mertcan-tas/drf-mail-scheduler/refs/heads/master/client/public/preview.gif)
+
 ## Technologies Used
 
 * **Django**: Web framework.
